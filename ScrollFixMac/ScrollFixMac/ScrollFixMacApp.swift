@@ -1,32 +1,16 @@
-//
-//  ScrollFixMacApp.swift
-//  ScrollFixMac
-//
-//  Created by Freddie Farr on 06/12/2025.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct ScrollFixMacApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    private let scrollEventTap = ScrollEventTap()
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    init() {
+        scrollEventTap.start()
+    }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
     }
 }
