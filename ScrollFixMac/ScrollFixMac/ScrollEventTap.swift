@@ -1,5 +1,5 @@
 import Cocoa
-import ApplicationServices // add this line
+import ApplicationServices
 
 final class ScrollEventTap {
     private var eventTap: CFMachPort?
@@ -14,8 +14,9 @@ final class ScrollEventTap {
         // Listen for scroll wheel events
         let mask = (1 << CGEventType.scrollWheel.rawValue)
         
-        // Quick debug to check accessibility trust
-        let trusted = AXIsProcessTrusted()
+        // Quick debug to check / request accessibility trust
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        let trusted = AXIsProcessTrustedWithOptions(options)
         print("ScrollEventTap.start called, AX trusted = \(trusted)")
         
         // Pass self into the callback via userInfo so we can update/read state
