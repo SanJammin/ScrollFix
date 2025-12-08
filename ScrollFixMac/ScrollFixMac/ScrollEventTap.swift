@@ -1,4 +1,5 @@
 import Cocoa
+import ApplicationServices // add this line
 
 final class ScrollEventTap {
     private var eventTap: CFMachPort?
@@ -12,6 +13,10 @@ final class ScrollEventTap {
     func start() {
         // Listen for scroll wheel events
         let mask = (1 << CGEventType.scrollWheel.rawValue)
+        
+        // Quick debug to check accessibility trust
+        let trusted = AXIsProcessTrusted()
+        print("ScrollEventTap.start called, AX trusted = \(trusted)")
         
         // Pass self into the callback via userInfo so we can update/read state
         let userInfo = Unmanaged.passUnretained(self).toOpaque()
@@ -77,9 +82,10 @@ final class ScrollEventTap {
                     let dt = now - tapSelf.lastMouseScrollTime
                     
                     // If momentum is happening very shortly after mouse scroll drop,
-                    // drop it to avoid the "trackpad glide" interfering
+                    // returning nil here cancels the momentum event completely.
                     if dt >= 0 && dt < tapSelf.momentumCutoff {
                         print("[trackpad] dropping momentum (dt=\(dt)) after mouse scroll")
+                        return nil
                     }
                 }
                 
