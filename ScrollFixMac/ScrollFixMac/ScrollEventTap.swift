@@ -9,6 +9,12 @@ final class ScrollEventTap {
     private var lastMouseScrollTime: CFAbsoluteTime = 0
     // How long after a mouse scroll we kill trackpad momentum (in seconds)
     private let momentumCutoff: CFTimeInterval = 0.2
+    // Controls whether the scroll modification logic is currently active
+    private var isEnabled = true
+
+    func setEnabled(_ newValue: Bool) {
+        isEnabled = newValue
+    }
 
     func start() {
         // Listen for scroll wheel events
@@ -43,6 +49,11 @@ final class ScrollEventTap {
 
                 // Wrap as NSEvent so we can check hasPreciseScrollingDeltas
                 guard let nsEvent = NSEvent(cgEvent: cgEvent) else {
+                    return Unmanaged.passRetained(cgEvent)
+                }
+
+                // If the feature is disabled, just pass events through unchanged
+                if !tapSelf.isEnabled {
                     return Unmanaged.passRetained(cgEvent)
                 }
 

@@ -8,9 +8,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Start the scroll event tap once the app has finished launching
         scrollEventTap.start()
 
-        // Set up the status bar icon and quit action
-        statusBarController = StatusBarController {
-            NSApplication.shared.terminate(nil)
-        }
+        // Set up the status bar icon and wire up toggle + quit
+        statusBarController = StatusBarController(
+            isInitiallyEnabled: true,
+            onToggle: { [weak self] enabled in
+                self?.scrollEventTap.setEnabled(enabled)
+            },
+            onQuit: {
+                NSApplication.shared.terminate(nil)
+            }
+        )
     }
 }

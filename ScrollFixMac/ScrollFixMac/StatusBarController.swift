@@ -2,37 +2,66 @@ import Cocoa
 
 final class StatusBarController {
     private let statusItem: NSStatusItem
+    private var toggleItem: NSMenuItem!
+    private var isEnabled: Bool
+    private let onToggle: (Bool) -> Void
+    private let onQuit: () -> Void
 
-    init(onQuit: @escaping () -> Void) {
-        // Create an item in the menu bar with variable length
+    init(
+        isInitiallyEnabled: Bool = true,
+        onToggle: @escaping (Bool) -> Void,
+        onQuit: @escaping () -> Void
+    ) {
+        self.isEnabled = isInitiallyEnabled
+        self.onToggle = onToggle
+        self.onQuit = onQuit
+
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.title = "⇅"   // simple placeholder title; you can swap for an image later
+            // Simple SF Symbol as a logo for now
+            button.image = NSImage(
+                systemSymbolName: "arrow.up.arrow.down.circle",
+                accessibilityDescription: "ScrollFix"
+            )
+            button.image?.isTemplate = true
             button.toolTip = "ScrollFix"
         }
 
-        // Build a basic menu
         let menu = NSMenu()
 
+        toggleItem = NSMenuItem(
+            title: "Enabled",
+            action: #selector(toggleClicked),
+            keyEquivalent: ""
+        )
+        toggleItem.target = self
+        toggleItem.state = isEnabled ? .on : .off
+        menu.addItem(toggleItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         let quitItem = NSMenuItem(
-            title: "Quit ScrollFix",
-            action: #selector(quitTapped),
+            title: "Quit ScrollFixMac",
+            action: #selector(quitClicked),
             keyEquivalent: "q"
         )
         quitItem.target = self
-
         menu.addItem(quitItem)
 
         statusItem.menu = menu
 
-        self.onQuit = onQuit
+        // Apply initial state once at startup
+        onToggle(isEnabled)
     }
 
-    // Stored callback for quitting the app
-    private var onQuit: (() -> Void)?
+    @objc private func toggleClicked() {
+        isEnabled.toggle()
+        toggleItem.state = isEnabled ? .on : .off
+        onToggle(isEnabled)
+    }
 
-    @objc private func quitTapped() {
-        onQuit?()
+    @objc private func quitClicked() {
+        onQuit()
     }
 }
